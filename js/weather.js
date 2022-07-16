@@ -1,15 +1,30 @@
-// let searchInput = document.querySelector('.input-group > input');
-// let searchButton = document.querySelector('.input-group > .btn');
-// searchButton.addEventListener('click', () => {
-// 	window.localStorage.setItem('city', searchInput.value);
-// });
-
-const kelvinToCelsius = (degree) => {
-	return Math.round(degree - 273,15);
-};
-
-fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e34aa72fef4e9503370d552f')
-	.then(response => response.json())
+fetchUrl = resource => {
+	fetch(resource)
+	.then(response => {
+		document.body.innerHTML = `<div class="overlay"></div>`;
+		if(response.status === 200){
+			return response.json();
+		}else{
+			document.body.innerHTML = `<div class="overlay"></div>
+			<div class="my-5 py-5 mx-auto text-center d-flex flex-column align-items-center">
+				<div class="bg-danger mb-3 p-2 rounded" style="--bs-bg-opacity: .8; width: 60%; border: 5px solid #dc3545">No city found with this name</div>
+				<h1>Welcome to Redlights Weather</h1>
+				<p>Please enter a city</p>
+				<div class="input-group" style="width: 60%;">
+					<input type="search" class="form-control border-0 border-bottom shadow-none" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+					<button type="button" class="btn btn-outline-light">search</button>
+				</div>
+			</div>`;
+			let searchInput = document.querySelector('.input-group > input');
+			let searchButton = document.querySelector('.input-group > .btn');
+			searchButton.addEventListener('click', () => {
+				window.localStorage.setItem('city', searchInput.value);
+				fetchUrl(`https://api.openweathermap.org/data/2.5/forecast?q=${window.localStorage.getItem('city')}&appid=cd557f36e34aa72fef4e9503370d552f`);
+			});
+			throw new Error('Wrong city name');
+		}
+		
+	})
 	.then(response => {
 		const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 		const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -92,6 +107,12 @@ fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e
 								</div>
 							</div>`;
 		document.body.appendChild(title);
+		let searchInput = document.querySelector('.input-group > input');
+		let searchButton = document.querySelector('.input-group > .btn');
+		searchButton.addEventListener('click', () => {
+			window.localStorage.setItem('city', searchInput.value);
+			fetchUrl(`https://api.openweathermap.org/data/2.5/forecast?q=${window.localStorage.getItem('city')}&appid=cd557f36e34aa72fef4e9503370d552f`);
+		});
 
 		//Creating today info
 		let todayInfo = document.createElement('div');
@@ -115,7 +136,7 @@ fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e
 												<p class="mb-0">Wind</pstyle=>
 											</div>
 											<div class="col-4 mb-3 mb-md-0">
-												<p class="sunrise fs-3 mb-0 lh-1">${new Date(response.city.sunrise * 1000).getHours()}:${new Date(response.city.sunrise * 1000).getMinutes()}</p>
+												<p class="sunrise fs-3 mb-0 lh-1">${new Date(response.city.sunrise * 1000).getHours() < 10 ? `0${new Date(response.city.sunrise * 1000).getHours()}` : new Date(response.city.sunrise * 1000).getHours()}:${new Date(response.city.sunrise * 1000).getMinutes() < 10 ? `0${new Date(response.city.sunrise * 1000).getMinutes()}` : new Date(response.city.sunrise * 1000).getMinutes()}</p>
 												<p class="mb-0">Sunrise</pstyle=>
 											</div>
 											<div class="col-4 mb-3 mb-md-0">
@@ -168,6 +189,7 @@ fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e
 		nextDays.classList.add('d-md-block');
 		nextDays.classList.add('mt-5');
 		nextDays.classList.add('pb-5');
+		nextDays.classList.add('fw-lighter');
 		nextDays.innerHTML = `<div class="container">
 									<div class="h3 mb-3">Next 5 days</div>
 								</div>`;
@@ -175,94 +197,94 @@ fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e
 		let nextDaysTable = document.querySelector('.next-days .container div:last-child');
 		nextDaysTable.innerHTML = `<div class="border-top d-flex justify-content-between py-2">
 										<div class="text-center">
-											<p class="day-name fs-3 mb-0 lh-1">${days[new Date(dayOneWeather[0].dt_txt).getDay()].substring(0,3)}</p>
-											<p class="mb-0">${new Date(dayOneWeather[0].dt_txt).getDate()}/${new Date(dayOneWeather[0].dt_txt).getMonth() + 1}</p>
+											<p class="day-name fs-4 mb-0 lh-1">${days[new Date(dayOneWeather[0].dt_txt).getDay()].substring(0,3)}</p>
+											<p class="mb-0 fs-4">${new Date(dayOneWeather[0].dt_txt).getDate()}/${new Date(dayOneWeather[0].dt_txt).getMonth() + 1}</p>
 										</div>
 										<img style="width: 44px; height: 44px;" src="./icons/${dayOneWeather[4].weather[0].icon}.png" alt="Weather icon">
 										<div class="text-center">
-											<p class="low fs-3 mb-0 lh-1">${Math.min(...dayOnetempDegrees)}°</p>
-											<p class="mb-0">Low</p>
+											<p class="low fs-4 mb-0 lh-1">${Math.min(...dayOnetempDegrees)}°</p>
+											<p class="mb-0 fs-4">Low</p>
 										</div>
 										<div class="text-center">
-											<p class="high fs-3 mb-0 lh-1">${Math.max(...dayOnetempDegrees)}°</p>
-											<p class="mb-0">High</p>
+											<p class="high fs-4 mb-0 lh-1">${Math.max(...dayOnetempDegrees)}°</p>
+											<p class="mb-0 fs-4">High</p>
 										</div>
 										<div class="text-center">
-											<p class="wind fs-3 mb-0 lh-1">${Math.round(dayOneWeather[4].wind.speed * 3600 / 1000)}km/h</p>
-											<p class="mb-0">Wind</p>
+											<p class="wind fs-4 mb-0 lh-1">${Math.round(dayOneWeather[4].wind.speed * 3600 / 1000)}km/h</p>
+											<p class="mb-0 fs-4">Wind</p>
 										</div>
 										<div class="text-center">
-											<p class="rain fs-3 mb-0 lh-1">${dayOneWeather[0].main.humidity}%</p>
-											<p class="mb-0">Humidity</p>
+											<p class="rain fs-4 mb-0 lh-1">${dayOneWeather[0].main.humidity}%</p>
+											<p class="mb-0 fs-4">Humidity</p>
 										</div>
 									</div>
 									<div class="border-top d-flex justify-content-between py-2">
 										<div class="text-center">
-											<p class="day-name fs-3 mb-0 lh-1">${days[new Date(dayTwoWeather[0].dt_txt).getDay()].substring(0,3)}</p>
-											<p class="mb-0">${new Date(dayTwoWeather[0].dt_txt).getDate()}/${new Date(dayTwoWeather[0].dt_txt).getMonth() + 1}</p>
+											<p class="day-name fs-4 mb-0 lh-1">${days[new Date(dayTwoWeather[0].dt_txt).getDay()].substring(0,3)}</p>
+											<p class="mb-0 fs-4">${new Date(dayTwoWeather[0].dt_txt).getDate()}/${new Date(dayTwoWeather[0].dt_txt).getMonth() + 1}</p>
 										</div>
 										<img style="width: 44px; height: 44px;" src="./icons/${dayTwoWeather[4].weather[0].icon}.png" alt="Weather icon">
 										<div class="text-center">
-											<p class="low fs-3 mb-0 lh-1">${Math.min(...dayTwotempDegrees)}°</p>
-											<p class="mb-0">Low</p>
+											<p class="low fs-4 mb-0 lh-1">${Math.min(...dayTwotempDegrees)}°</p>
+											<p class="mb-0 fs-4">Low</p>
 										</div>
 										<div class="text-center">
-											<p class="high fs-3 mb-0 lh-1">${Math.max(...dayTwotempDegrees)}°</p>
-											<p class="mb-0">High</p>
+											<p class="high fs-4 mb-0 lh-1">${Math.max(...dayTwotempDegrees)}°</p>
+											<p class="mb-0 fs-4">High</p>
 										</div>
 										<div class="text-center">
-											<p class="wind fs-3 mb-0 lh-1">${Math.round(dayTwoWeather[4].wind.speed * 3600 / 1000)}km/h</p>
-											<p class="mb-0">Wind</p>
+											<p class="wind fs-4 mb-0 lh-1">${Math.round(dayTwoWeather[4].wind.speed * 3600 / 1000)}km/h</p>
+											<p class="mb-0 fs-4">Wind</p>
 										</div>
 										<div class="text-center">
-											<p class="rain fs-3 mb-0 lh-1">${dayTwoWeather[0].main.humidity}%</p>
-											<p class="mb-0">Humidity</p>
+											<p class="rain fs-4 mb-0 lh-1">${dayTwoWeather[0].main.humidity}%</p>
+											<p class="mb-0 fs-4">Humidity</p>
 										</div>
 									</div>
 									<div class="border-top d-flex justify-content-between py-2">
 										<div class="text-center">
-											<p class="day-name fs-3 mb-0 lh-1">${days[new Date(dayThreeWeather[0].dt_txt).getDay()].substring(0,3)}</p>
-											<p class="mb-0">${new Date(dayThreeWeather[0].dt_txt).getDate()}/${new Date(dayThreeWeather[0].dt_txt).getMonth() + 1}</p>
+											<p class="day-name fs-4 mb-0 lh-1">${days[new Date(dayThreeWeather[0].dt_txt).getDay()].substring(0,3)}</p>
+											<p class="mb-0 fs-4">${new Date(dayThreeWeather[0].dt_txt).getDate()}/${new Date(dayThreeWeather[0].dt_txt).getMonth() + 1}</p>
 										</div>
 										<img style="width: 44px; height: 44px;" src="./icons/${dayThreeWeather[4].weather[0].icon}.png" alt="Weather icon">
 										<div class="text-center">
-											<p class="low fs-3 mb-0 lh-1">${Math.min(...dayThreetempDegrees)}°</p>
-											<p class="mb-0">Low</p>
+											<p class="low fs-4 mb-0 lh-1">${Math.min(...dayThreetempDegrees)}°</p>
+											<p class="mb-0 fs-4">Low</p>
 										</div>
 										<div class="text-center">
-											<p class="high fs-3 mb-0 lh-1">${Math.max(...dayThreetempDegrees)}°</p>
-											<p class="mb-0">High</p>
+											<p class="high fs-4 mb-0 lh-1">${Math.max(...dayThreetempDegrees)}°</p>
+											<p class="mb-0 fs-4">High</p>
 										</div>
 										<div class="text-center">
-											<p class="wind fs-3 mb-0 lh-1">${Math.round(dayThreeWeather[4].wind.speed * 3600 / 1000)}km/h</p>
-											<p class="mb-0">Wind</p>
+											<p class="wind fs-4 mb-0 lh-1">${Math.round(dayThreeWeather[4].wind.speed * 3600 / 1000)}km/h</p>
+											<p class="mb-0 fs-4">Wind</p>
 										</div>
 										<div class="text-center">
-											<p class="rain fs-3 mb-0 lh-1">${dayThreeWeather[0].main.humidity}%</p>
-											<p class="mb-0">Humidity</p>
+											<p class="rain fs-4 mb-0 lh-1">${dayThreeWeather[0].main.humidity}%</p>
+											<p class="mb-0 fs-4">Humidity</p>
 										</div>
 									</div>
 									<div class="border-top border-bottom d-flex justify-content-between py-2">
 										<div class="text-center">
-											<p class="day-name fs-3 mb-0 lh-1">${days[new Date(dayFourWeather[0].dt_txt).getDay()].substring(0,3)}</p>
-											<p class="mb-0">${new Date(dayFourWeather[0].dt_txt).getDate()}/${new Date(dayFourWeather[0].dt_txt).getMonth() + 1}</p>
+											<p class="day-name fs-4 mb-0 lh-1">${days[new Date(dayFourWeather[0].dt_txt).getDay()].substring(0,3)}</p>
+											<p class="mb-0 fs-4">${new Date(dayFourWeather[0].dt_txt).getDate()}/${new Date(dayFourWeather[0].dt_txt).getMonth() + 1}</p>
 										</div>
 										<img style="width: 44px; height: 44px;" src="./icons/${dayFourWeather[4].weather[0].icon}.png" alt="Weather icon">
 										<div class="text-center">
-											<p class="low fs-3 mb-0 lh-1">${Math.min(...dayFourtempDegrees)}°</p>
-											<p class="mb-0">Low</p>
+											<p class="low fs-4 mb-0 lh-1">${Math.min(...dayFourtempDegrees)}°</p>
+											<p class="mb-0 fs-4">Low</p>
 										</div>
 										<div class="text-center">
-											<p class="high fs-3 mb-0 lh-1">${Math.max(...dayFourtempDegrees)}°</p>
-											<p class="mb-0">High</p>
+											<p class="high fs-4 mb-0 lh-1">${Math.max(...dayFourtempDegrees)}°</p>
+											<p class="mb-0 fs-4">High</p>
 										</div>
 										<div class="text-center">
-											<p class="wind fs-3 mb-0 lh-1">${Math.round(dayFourWeather[4].wind.speed * 3600 / 1000)}km/h</p>
-											<p class="mb-0">Wind</p>
+											<p class="wind fs-4 mb-0 lh-1">${Math.round(dayFourWeather[4].wind.speed * 3600 / 1000)}km/h</p>
+											<p class="mb-0 fs-4">Wind</p>
 										</div>
 										<div class="text-center">
-											<p class="rain fs-3 mb-0 lh-1">${dayFourWeather[0].main.humidity}%</p>
-											<p class="mb-0">Humidity</p>
+											<p class="rain fs-4 mb-0 lh-1">${dayFourWeather[0].main.humidity}%</p>
+											<p class="mb-0 fs-4">Humidity</p>
 										</div>
 									</div>`;
 
@@ -301,3 +323,30 @@ fetch('https://api.openweathermap.org/data/2.5/forecast?q=annaba&appid=cd557f36e
 								</div>`;
 	})
 	.catch(err => console.error(`The error is ${err}`));
+}
+
+if(!window.localStorage.getItem('city')){
+	document.body.innerHTML = `<div class="overlay"></div>
+								<div class="my-5 py-5 mx-auto text-center d-flex flex-column align-items-center">
+									<h1>Welcome to Redlights Weather</h1>
+									<p>Please enter a city</p>
+									<div class="input-group" style="width: 60%;">
+										<input type="search" class="form-control border-0 border-bottom shadow-none" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+										<button type="button" class="btn btn-outline-light">search</button>
+									</div>
+								</div>`;
+	let searchInput = document.querySelector('.input-group > input');
+	let searchButton = document.querySelector('.input-group > .btn');
+	searchButton.addEventListener('click', () => {
+		window.localStorage.setItem('city', searchInput.value);
+		fetchUrl(`https://api.openweathermap.org/data/2.5/forecast?q=${window.localStorage.getItem('city')}&appid=cd557f36e34aa72fef4e9503370d552f`);
+	});
+}else{
+	fetchUrl(`https://api.openweathermap.org/data/2.5/forecast?q=${window.localStorage.getItem('city')}&appid=cd557f36e34aa72fef4e9503370d552f`);
+}
+
+
+
+const kelvinToCelsius = (degree) => {
+	return Math.round(degree - 273,15);
+};
